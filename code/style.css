@@ -1,0 +1,609 @@
+        /* ─── VARIABLES GLOBALES ──────────────────────────────────────────────
+           On définit les couleurs ici une seule fois.
+           Partout dans le CSS on écrit var(--jaune) au lieu de #FFFF00.
+           Si on veut changer la couleur, on ne change que cette ligne.        */
+        :root {
+            --jaune: #FFFF00;
+            --noir:  #000000;
+        }
+
+
+        /* ─── RESET DE BASE ───────────────────────────────────────────────────
+           Par défaut les navigateurs ajoutent des marges/paddings sur certains
+           éléments. On les remet tous à zéro pour partir d'une base propre.   */
+        * {
+            box-sizing: border-box; /* le padding est inclus dans la largeur déclarée */
+            margin: 0;
+            padding: 0;
+        }
+
+
+        /* ─── STYLE DE LA PAGE ────────────────────────────────────────────── */
+        body {
+            background-color: var(--noir);
+            color: var(--jaune);
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;          /* la page fait au minimum toute la hauteur de l'écran */
+            display: flex;
+            flex-direction: column;     /* header / main / footer s'empilent verticalement */
+            padding: 1rem;
+            overflow-x: hidden;         /* pas de scroll horizontal */
+        }
+
+        /* Couleur du texte quand l'utilisateur le sélectionne avec la souris */
+        ::selection {
+            background-color: #facc15;
+            color: #000;
+        }
+
+
+        /* ─── SCROLLBAR PERSONNALISÉE (Chrome, Safari) ────────────────────── */
+        ::-webkit-scrollbar        { width: 6px; }
+        ::-webkit-scrollbar-track  { background: var(--noir); }
+        ::-webkit-scrollbar-thumb  { background: var(--jaune); }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           COMPOSANTS VISUELS RÉUTILISABLES
+           ══════════════════════════════════════════════════════════════════════ */
+
+        /* Motif de rayures diagonales jaune/noir (style panneau de chantier) */
+        .rayures {
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--jaune),
+                var(--jaune) 10px,
+                var(--noir)  10px,
+                var(--noir)  20px
+            );
+        }
+
+        /* Style visuel des zones de saisie (textarea) */
+        .champ-saisie {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 0, 0.3); /* jaune semi-transparent */
+            color: var(--jaune);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Quand l'utilisateur clique dans un champ */
+        .champ-saisie:focus {
+            border-color: var(--jaune);
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.2); /* lueur jaune */
+        }
+
+        /* Coin décoratif en haut à gauche d'un bloc */
+        .coin-haut-gauche {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-top:  3px solid var(--jaune);
+            border-left: 3px solid var(--jaune);
+            top:  -2px;
+            left: -2px;
+        }
+
+        /* Coin décoratif en bas à droite d'un bloc */
+        .coin-bas-droite {
+            position: absolute;
+            width:  15px;
+            height: 15px;
+            border-bottom: 3px solid var(--jaune);
+            border-right:  3px solid var(--jaune);
+            bottom: -2px;
+            right:  -2px;
+        }
+
+        /* Ligne animée qui défile sur les zones de texte (effet écran de terminal) */
+        .ligne-scan {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 0, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* la ligne ne bloque pas les clics */
+            animation: scanner 4s linear infinite;
+        }
+
+        /* Animation : la ligne descend du haut vers le bas en boucle */
+        @keyframes scanner {
+            from { top: 0; }
+            to   { top: 100%; }
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           MISE EN PAGE GÉNÉRALE
+           ══════════════════════════════════════════════════════════════════════ */
+
+        /* Conteneur qui centre le contenu et limite sa largeur maximale */
+        .conteneur {
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           EN-TÊTE
+           ══════════════════════════════════════════════════════════════════════ */
+
+        .entete {
+            display: flex;
+            flex-direction: column;     /* empilé sur mobile */
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Sur grand écran : l'en-tête passe en une seule ligne horizontale */
+        @media (min-width: 768px) {
+            .entete {
+                flex-direction: row;
+                align-items: flex-end;
+            }
+        }
+
+        /* La ligne logo rayé + titre */
+        .entete-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Le petit carré de rayures dans le logo */
+        .entete-logo .carre-rayures {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0; /* ne rétrécit pas si l'espace manque */
+        }
+
+        /* Le grand titre "Syncro // v.4.0" */
+        .entete-titre {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+
+        /* Le sous-titre en dessous du logo */
+        .entete-sous-titre {
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* Bloc statut système à droite de l'en-tête */
+        .entete-statut {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            border-left: 2px solid var(--jaune);
+            padding-left: 1.5rem;
+        }
+
+        .entete-statut-ligne {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .entete-statut-texte {
+            font-size: 0.625rem;
+            font-weight: 700;
+        }
+
+        .entete-statut-description {
+            font-size: 0.5625rem;
+            opacity: 0.5;
+            max-width: 200px;
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           ZONES DE SAISIE (ALPHA & BETA)
+           ══════════════════════════════════════════════════════════════════════ */
+
+        /* Grille qui place Alpha et Beta côte à côte sur grand écran */
+        .grille-saisie {
+            display: grid;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (min-width: 768px) {
+            .grille-saisie {
+                grid-template-columns: 1fr 1fr; /* deux colonnes égales */
+            }
+        }
+
+        /* Bloc d'une zone de saisie (Alpha ou Beta) */
+        .bloc-saisie {
+            position: relative; /* nécessaire pour que les éléments "absolute" se positionnent ici */
+        }
+
+        /* Ligne "badge du champ + compteur d'items" */
+        .bloc-saisie-entete {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Badge coloré "Input Alpha" / "Input Beta" */
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background-color: var(--jaune);
+            color: var(--noir);
+            padding: 0.125rem 0.5rem;
+        }
+
+        /* Compteur "0 items detected" */
+        .compteur {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+        }
+		
+		.alert {
+			font-size: 0.5625rem;
+            opacity: 0.5;
+            display: flex;
+            justify-content: center;
+			margin-bottom: 5rem;
+        }
+
+        /* Conteneur de la zone de dépôt (drag & drop) */
+        .zone-depot {
+            position: relative;
+        }
+
+        /* La grande zone de texte où l'utilisateur colle ses données */
+        .zone-texte {
+            width: 100%;
+            height: 400px;
+            padding: 1.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.875rem;
+            resize: none; /* désactive le redimensionnement manuel */
+        }
+
+        /* Groupe de boutons IMPORT / CLEAR superposés en bas à droite */
+        .groupe-boutons {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Style commun aux boutons IMPORT et CLEAR */
+        .bouton {
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        /* Bouton IMPORT */
+        .bouton-import {
+            background-color: rgba(255, 255, 0, 0.1);
+            border: 1px solid var(--jaune);
+            color: var(--jaune);
+        }
+
+        .bouton-import:hover {
+            background-color: var(--jaune);
+            color: var(--noir);
+        }
+
+        /* Bouton CLEAR */
+        .bouton-clear {
+            background: transparent;
+            border: 1px solid var(--jaune);
+            color: var(--jaune);
+        }
+
+        .bouton-clear:hover {
+            background-color: #dc2626; /* rouge au survol */
+            border-color: #dc2626;
+            color: #fff;
+        }
+
+        /* Input file caché (rendu invisible, déclenché par le bouton IMPORT) */
+        .input-fichier-cache {
+            display: none;
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           BOUTON D'ACTION PRINCIPAL
+           ══════════════════════════════════════════════════════════════════════ */
+
+        /* Centrage du bouton */
+        .zone-bouton-principal {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Le bouton lui-même */
+        .bouton-principal {
+            background: var(--jaune);
+            color: var(--noir);
+            font-size: 1.25rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 1.5rem 4rem;
+            border: 4px solid var(--noir);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.15s, filter 0.15s;
+            /* clip-path découpe le bouton en hexagone asymétrique */
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        .bouton-principal:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* La flèche ">>>" à l'intérieur du bouton */
+        .bouton-principal .fleche {
+            transition: transform 0.2s;
+        }
+
+        .bouton-principal:hover .fleche {
+            transform: translateX(8px); /* glisse vers la droite au survol */
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           SECTION RÉSULTATS
+           ══════════════════════════════════════════════════════════════════════ */
+
+        /* La section est cachée par défaut.
+           Le JavaScript retire cette classe après la comparaison. */
+        .cache {
+            display: none;
+        }
+
+        .section-resultats {
+            border-top: 2px solid var(--jaune);
+            padding-top: 3rem;
+            margin-bottom: 5rem;
+        }
+
+        /* Grille : stats à gauche, tableau à droite */
+        .grille-resultats {
+            display: grid;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .grille-resultats {
+                grid-template-columns: 1fr 2fr; /* 1/3 pour les stats, 2/3 pour les résultats */
+            }
+        }
+
+        /* Encadré des statistiques */
+        .bloc-stats {
+            border: 2px solid var(--jaune);
+            padding: 1.5rem;
+        }
+
+        /* Titre de section en petites majuscules avec séparateur */
+        .titre-section {
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 0, 0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Ligne grand chiffre + label "Matches" */
+        .ligne-matchs {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Le grand chiffre animé */
+        .grand-chiffre {
+            font-size: 3.75rem;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        /* Le label "Matches" à côté */
+        .label-matchs {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Conteneur de la barre de progression */
+        .barre-conteneur {
+            height: 1rem;
+            width: 100%;
+            background-color: rgba(255, 255, 0, 0.1);
+            border: 1px solid var(--jaune);
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden; /* cache le débordement de la barre intérieure */
+        }
+
+        /* La barre qui se remplit (sa largeur est animée par le JS) */
+        .barre-remplissage {
+            height: 100%;
+            background-color: var(--jaune);
+            width: 0%; /* démarre à 0, le JS l'anime vers X% */
+            transition: width 1s ease; /* animation CSS de 1 seconde */
+        }
+
+        /* Texte du pourcentage */
+        .texte-pourcentage {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.625rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Panneau des valeurs communes (à droite) */
+        .panneau-resultats {
+            position: relative;
+            border: 2px solid var(--jaune);
+        }
+
+        /* En-tête jaune du panneau */
+        .panneau-entete {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--jaune);
+            color: var(--noir);
+        }
+
+        .panneau-entete-titre {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Bouton "COPY_ALL_DATA" dans le panneau */
+        .bouton-copier {
+            font-size: 0.625rem;
+            font-weight: 900;
+            border: 2px solid var(--noir);
+            padding: 0.25rem 1rem;
+            background: transparent;
+            color: var(--noir);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .bouton-copier:hover {
+            background-color: var(--noir);
+            color: var(--jaune);
+        }
+
+        /* Zone scrollable de la liste des résultats */
+        .liste-resultats {
+            padding: 1.5rem;
+            height: 300px;
+            overflow-y: auto; /* scroll vertical si trop de résultats */
+            font-family: 'Space Mono', monospace;
+            font-size: 0.875rem;
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: 1fr; /* 1 colonne par défaut */
+        }
+
+        @media (min-width: 640px) {
+            .liste-resultats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 768px) {
+            .liste-resultats { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Chaque item de résultat dans la liste */
+        .item-resultat {
+            border: 1px solid rgba(255, 255, 0, 0.4);
+            padding: 0.5rem;
+            font-size: 0.625rem;
+            cursor: default;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis; /* affiche "..." si le texte dépasse */
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .item-resultat:hover {
+            background-color: var(--jaune);
+            color: var(--noir);
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           PIED DE PAGE
+           ══════════════════════════════════════════════════════════════════════ */
+
+        .pied-de-page {
+            border-top: 1px solid rgba(255, 255, 0, 0.2);
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .pied-de-page { flex-direction: row; }
+        }
+
+        .pied-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .pied-logo .carre-rayures {
+            width: 48px;
+            height: 16px;
+        }
+
+        .pied-version {
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .pied-copyright {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.625rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════════════
+           NOTIFICATION POPUP (créée dynamiquement par le JavaScript)
+           ══════════════════════════════════════════════════════════════════════ */
+
+        .notification {
+            position: fixed;    /* reste visible même si on scrolle */
+            bottom: 2.5rem;
+            right: 2.5rem;
+            background-color: var(--jaune);
+            color: var(--noir);
+            font-weight: 900;
+            padding: 1rem;
+            border: 4px solid var(--noir);
+            box-shadow: 8px 8px 0px var(--noir); /* ombre dure style brutaliste */
+            z-index: 50;         /* au-dessus de tout le reste */
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+        }

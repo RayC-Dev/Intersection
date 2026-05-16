@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intersection</title>
+
+    <!-- SheetJS : bibliothèque pour lire les fichiers Excel (.xlsx) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <!-- Google Fonts : deux polices chargées depuis internet -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Space+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  	<link href="icon.png" rel="icon" sizes="192x192">
+</head>
+
+<body>
+
+    <!-- ╔════════════════════════╗
+         ║       EN-TÊTE          ║
+         ╚════════════════════════╝ -->
+    <header class="conteneur entete">
+
+        <!-- Bloc gauche : logo + titres -->
+        <div>
+            <div class="entete-logo">
+                <!-- Petit carré décoratif avec le motif de rayures -->
+                <div class="carre-rayures rayures"></div>
+                <h1 class="entete-titre">Intersection // v.1.2</h1>
+            </div>
+            <p class="entete-sous-titre">Comparateur de données Excel</p>
+        </div>
+
+        <!-- Bloc droit : statut système -->
+        <div class="entete-statut">
+            <div class="entete-statut-ligne">
+                <span class="entete-statut-texte">SYSTEME_OPÉRATIONNEL</span>
+            </div>
+            <p class="entete-statut-description">ALGORITHME DE VÉRIFICATION CROISÉE HAUTE VITESSE POUR LES LISTES EXCEL.</p>
+        </div>
+    </header>
+
+
+    <!-- ╔════════════════════════╗
+         ║   CONTENU PRINCIPAL    ║
+         ╚════════════════════════╝ -->
+    <main class="conteneur" style="flex-grow: 1;">
+
+        <!-- Grille des deux zones de saisie côte à côte -->
+        <div class="grille-saisie">
+
+            <!-- ── ZONE ALPHA ────────────────────────────────────── -->
+            <!--
+              "position: relative" sur ce bloc est indispensable :
+              les enfants avec "position: absolute" (coin, boutons) se
+              positionnent par rapport à cet ancêtre.
+            -->
+            <div class="bloc-saisie">
+                <div class="coin-haut-gauche"></div>
+
+                <!-- Ligne badge + compteur -->
+                <div class="bloc-saisie-entete">
+                    <span class="badge">Zone Alpha</span>
+                    <!-- Ce texte sera mis à jour en JavaScript à chaque frappe -->
+                    <span id="count-a" class="compteur">0 élément détecté</span>
+                </div>
+
+                <!-- Zone de drag & drop -->
+                <div id="drop-a" class="zone-depot">
+                    <div class="ligne-scan"></div>
+                    <textarea
+                        id="list-a"
+                        class="zone-texte champ-saisie"
+                        placeholder="Collez votre liste ou déposez votre fichier Excel ici..."
+                    ></textarea>
+
+                    <!-- Boutons flottants en bas à droite -->
+                    <div class="groupe-boutons">
+                        <!-- Ce bouton déclenche un clic sur l'input file caché -->
+                        <button onclick="document.getElementById('file-a').click()" class="bouton bouton-import">IMPORT</button>
+                        <button onclick="clearList('a')" class="bouton bouton-clear">SUPPR</button>
+                    </div>
+                </div>
+
+                <!-- Input file invisible, ouvert par le bouton IMPORT -->
+                <input type="file" id="file-a" class="input-fichier-cache" accept=".xlsx, .xls, .csv, .txt">
+            </div>
+
+            <!-- ── ZONE BETA ─────────────────────────────────────── -->
+            <div class="bloc-saisie">
+                <div class="coin-haut-gauche"></div>
+
+                <div class="bloc-saisie-entete">
+                    <span class="badge">Zone BETA</span>
+                    <span id="count-b" class="compteur">0 élément détecté</span>
+                </div>
+
+                <div id="drop-b" class="zone-depot">
+                    <div class="ligne-scan"></div>
+                    <textarea
+                        id="list-b"
+                        class="zone-texte champ-saisie"
+                        placeholder="Collez votre liste ou déposez votre fichier Excel ici..."
+                    ></textarea>
+
+                    <div class="groupe-boutons">
+                        <button onclick="document.getElementById('file-b').click()" class="bouton bouton-import">IMPORT</button>
+                        <button onclick="clearList('b')" class="bouton bouton-clear">SUPPR</button>
+                    </div>
+                </div>
+
+                <input type="file" id="file-b" class="input-fichier-cache" accept=".xlsx, .xls, .csv, .txt">
+            </div>
+        </div>
+
+
+        <!-- ── BOUTON DE LANCEMENT ────────────────────────────────── -->
+        <div class="zone-bouton-principal">
+            <button onclick="compareData()" class="bouton-principal">Lancer Intersection<span class="fleche">>>></span></button>
+        </div>
+		<span class="alert">Aucune donnée ne quitte ce terminal</span>
+
+
+        <!-- ── SECTION RÉSULTATS ──────────────────────────────────── -->
+        <!--
+          La classe "cache" = display:none.
+          Le JavaScript la retire après la comparaison pour révéler la section.
+        -->
+        <section id="results-container" class="section-resultats cache">
+            <div class="grille-resultats">
+
+                <!-- Colonne gauche : statistiques -->
+                <div class="bloc-stats">
+                    <h4 class="titre-section">Module d'analyse</h4>
+
+                    <!-- Grand nombre de matchs -->
+                    <div class="ligne-matchs">
+                        <!-- Le JS met à jour ce chiffre avec une animation -->
+                        <span class="grand-chiffre" id="match-count">0</span>
+                        <span class="label-matchs">Données correspondances</span>
+                    </div>
+
+                    <!-- Barre de progression -->
+                    <div class="barre-conteneur">
+                        <!-- Sa largeur (width) est animée par le JS de 0% vers X% -->
+                        <div class="barre-remplissage" id="match-bar"></div>
+                    </div>
+
+                    <!-- Texte du pourcentage, mis à jour par le JS -->
+                    <p class="texte-pourcentage" id="match-perc">RATIO DE CORRESPONDANCE: 0.00%</p>
+                </div>
+
+                <!-- Colonne droite : tableau des valeurs communes -->
+                <div class="panneau-resultats">
+
+                    <!-- En-tête jaune -->
+                    <div class="panneau-entete">
+                        <h3 class="panneau-entete-titre">Données commune</h3>
+                        <button onclick="copyToClipboard()" class="bouton-copier">TOUT COPIER</button>
+                    </div>
+
+                    <!-- Liste scrollable (remplie dynamiquement par le JS) -->
+                    <div id="results-list" class="liste-resultats">
+                        <!-- Les items .item-resultat sont créés par renderResults() en JS -->
+                    </div>
+
+                    <div class="coin-bas-droite"></div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+
+    <!-- ╔════════════════════════╗
+         ║      PIED DE PAGE      ║
+         ╚════════════════════════╝ -->
+    <footer class="conteneur pied-de-page">
+        <div class="pied-logo">
+            <div class="carre-rayures rayures"></div>
+            <span class="pied-version">Version 1.2</span>
+        </div>
+        <div class="pied-copyright">
+            Prototype By Ray
+        </div>
+    </footer>
+	 
+	 <script>
+        // ── 1. RÉFÉRENCES AUX ÉLÉMENTS HTML ──────────────────────────────
+        // document.getElementById('xxx') attrape l'élément avec id="xxx".
+        // On les stocke dans des variables pour ne pas répéter la recherche.
+
+        const inputs = {
+            a: document.getElementById('list-a'), // textarea Alpha
+            b: document.getElementById('list-b')  // textarea Beta
+        };
+
+        const display = {
+            countA:     document.getElementById('count-a'),         // compteur Alpha
+            countB:     document.getElementById('count-b'),         // compteur Beta
+            results:    document.getElementById('results-list'),    // liste des résultats
+            matchCount: document.getElementById('match-count'),     // grand chiffre
+            matchBar:   document.getElementById('match-bar'),       // barre de progression
+            matchPerc:  document.getElementById('match-perc'),      // texte du pourcentage
+            container:  document.getElementById('results-container') // section résultats entière
+        };
+
+
+        // ── 2. COMPTEUR EN TEMPS RÉEL ─────────────────────────────────────
+        // Pour chaque zone de texte : écoute chaque frappe et compte les lignes.
+
+        Object.keys(inputs).forEach(key => {
+            inputs[key].addEventListener('input', () => {
+                // split(/\r?\n/) : coupe le texte en tableau de lignes
+                // filter(...)    : supprime les lignes vides
+                // .length        : compte ce qu'il reste
+                const count = inputs[key].value
+                    .split(/\r?\n/)
+                    .filter(ligne => ligne.trim() !== '')
+                    .length;
+
+                // Met à jour le compteur affiché (ex: "42 items detected")
+                // 'count' + 'A' ou 'B' → accède à display.countA ou display.countB
+                display[`count${key.toUpperCase()}`].innerText = `${count} éléments détectés`;
+            });
+        });
+
+
+        // ── 3. VIDER UNE ZONE ─────────────────────────────────────────────
+
+        function clearList(id) {
+            inputs[id].value = '';  // efface le textarea
+            display[`count${id.toUpperCase()}`].innerText = '0 élément détecté';
+        }
+
+
+        // ── 4. LECTURE DE FICHIERS EXCEL / CSV ────────────────────────────
+        // FileReader : API native du navigateur pour lire un fichier local.
+        // XLSX : bibliothèque SheetJS chargée en haut de la page.
+
+        function handleFile(file, target) {
+            const reader = new FileReader();
+
+            // Cette fonction s'exécute quand le fichier est entièrement lu
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result); // contenu brut en octets
+
+                // XLSX.read() analyse le fichier Excel et renvoie un "classeur"
+                const classeur = XLSX.read(data, { type: 'array' });
+
+                let toutes_les_cellules = [];
+
+                // On parcourt chaque feuille du classeur
+                classeur.SheetNames.forEach(nomFeuille => {
+                    const feuille = classeur.Sheets[nomFeuille];
+
+                    // Convertit la feuille en tableau de tableaux (lignes → colonnes)
+                    const lignes = XLSX.utils.sheet_to_json(feuille, { header: 1 });
+
+                    // Pour chaque ligne, pour chaque cellule non vide : on l'ajoute
+                    lignes.forEach(ligne => {
+                        ligne.forEach(cellule => {
+                            if (cellule) toutes_les_cellules.push(String(cellule).trim());
+                        });
+                    });
+                });
+
+                // Colle les données à la suite de ce qui était déjà dans la zone
+                const contenu_precedent = inputs[target].value.trim();
+                inputs[target].value = (contenu_precedent ? contenu_precedent + '\n' : '')
+                    + toutes_les_cellules.join('\n');
+
+                // Déclenche "input" manuellement pour mettre à jour le compteur
+                inputs[target].dispatchEvent(new Event('input'));
+            };
+
+            reader.readAsArrayBuffer(file); // lance la lecture
+        }
+
+
+        // ── 5. DRAG AND DROP + SÉLECTION DE FICHIER ──────────────────────
+
+        ['a', 'b'].forEach(id => {
+            const zone = document.getElementById(`drop-${id}`);
+
+            // Fichier qui glisse au-dessus de la zone
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault(); // sans ça, le navigateur ouvrirait le fichier lui-même
+                zone.style.opacity = '0.5'; // assombrit la zone
+            });
+
+            // Fichier qui quitte la zone
+            zone.addEventListener('dragleave', () => {
+                zone.style.opacity = '1';
+            });
+
+            // Fichier lâché sur la zone
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.style.opacity = '1';
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], id);
+            });
+
+            // Fichier sélectionné via le bouton IMPORT
+            document.getElementById(`file-${id}`).addEventListener('change', (e) => {
+                if (e.target.files[0]) handleFile(e.target.files[0], id);
+            });
+        });
+
+
+        // ── 6. COMPARAISON : TROUVER LES VALEURS COMMUNES ─────────────────
+
+        function compareData() {
+            // Liste A → transformée en Set (ensemble sans doublons, recherche ultra-rapide)
+            const dataA = new Set(
+                inputs.a.value
+                    .split(/\r?\n/)
+                    .map(s => s.trim())
+                    .filter(s => s !== '')
+            );
+
+            // Liste B → reste un tableau classique
+            const dataB = inputs.b.value
+                .split(/\r?\n/)
+                .map(s => s.trim())
+                .filter(s => s !== '');
+
+            // Si les deux zones sont vides
+            if (dataA.size === 0 && dataB.length === 0) {
+                notify('ERREUR : AUCUNE DONNÉE DÉTECTÉE');
+                return; // sort immédiatement de la fonction
+            }
+
+            // INTERSECTION : garde uniquement les éléments de B qui existent dans A
+            // new Set(...) supprime les doublons, [...] remet en tableau
+            const valeurs_communes = [...new Set(dataB.filter(item => dataA.has(item)))];
+
+            afficherResultats(valeurs_communes, Math.max(dataA.size, dataB.length));
+        }
+
+
+        // ── 7. AFFICHAGE DES RÉSULTATS ────────────────────────────────────
+
+        function afficherResultats(matches, totalMax) {
+
+            // Rend la section visible (enlève la classe "cache" = display:none)
+            display.container.classList.remove('cache');
+            display.results.innerHTML = ''; // vide les anciens résultats
+
+            // Animation du compteur : monte de 0 jusqu'au nombre de matchs
+            let i = 0;
+            const timer = setInterval(() => {
+                if (i >= matches.length) {
+                    display.matchCount.innerText = matches.length;
+                    clearInterval(timer); // stoppe l'intervalle
+                } else {
+                    display.matchCount.innerText = i;
+                    i += Math.ceil(matches.length / 20) || 1; // avance par paliers
+                }
+            }, 30); // toutes les 30ms
+
+            // Calcul et affichage du pourcentage
+            const pourcentage = totalMax > 0
+                ? (matches.length / totalMax * 100).toFixed(2)
+                : 0;
+            display.matchPerc.innerText = `RATIO DE CORRESPONDANCE: ${pourcentage}%`;
+
+            // Délai de 100ms pour que le navigateur "voit" la barre à 0% avant de l'animer
+            setTimeout(() => { display.matchBar.style.width = `${pourcentage}%`; }, 100);
+
+            // Création d'un div par valeur commune trouvée
+            if (matches.length > 0) {
+                matches.forEach(valeur => {
+                    const div = document.createElement('div');
+                    div.className = 'item-resultat';
+                    div.textContent = `> ${valeur}`;
+                    display.results.appendChild(div);
+                });
+            } else {
+                display.results.innerHTML = '<div style="opacity:0.4; font-style:italic; grid-column: 1/-1;">AUCUNE DONNÉE COMMUNE IDENTIFIÉE</div>';
+            }
+
+            // Scroll automatique vers la section résultats
+            display.container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        // ── 8. COPIE DANS LE PRESSE-PAPIERS ──────────────────────────────
+
+        function copyToClipboard() {
+            // Récupère le texte de chaque item (sans le préfixe "> ")
+            const texte = Array.from(display.results.children)
+                .map(el => el.textContent.replace('> ', ''))
+                .join('\n');
+
+            // Méthode classique : textarea temporaire + select + copy
+            const zone_temp = document.createElement('textarea');
+            zone_temp.value = texte;
+            document.body.appendChild(zone_temp);
+            zone_temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(zone_temp);
+
+            notify('DONNÉES COPIÉES');
+        }
+
+
+        // ── 9. NOTIFICATION TEMPORAIRE ───────────────────────────────────
+
+        function notify(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.innerText = message;
+            document.body.appendChild(notif);
+            // Disparaît automatiquement après 3 secondes
+            setTimeout(() => notif.remove(), 3000);
+        }
+		</script>
+</body>
+</html>
