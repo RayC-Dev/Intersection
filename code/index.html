@@ -26,7 +26,7 @@
             <div class="entete-logo">
                 <!-- Petit carré décoratif avec le motif de rayures -->
                 <div class="carre-rayures rayures"></div>
-                <h1 class="entete-titre">Intersection // v.1.2</h1>
+                <h1 class="entete-titre">Intersection // v.1.3</h1>
             </div>
             <p class="entete-sous-titre">Comparateur de liste/tableau</p>
         </div>
@@ -137,7 +137,7 @@
                     <div class="ligne-matchs">
                         <!-- Le JS met à jour ce chiffre avec une animation -->
                         <span class="grand-chiffre" id="match-count">0</span>
-                        <span class="label-matchs">Données correspondances</span>
+                        <span class="label-matchs">Données correspondantes sans doublons</span>
                     </div>
 
                     <!-- Barre de progression -->
@@ -181,10 +181,13 @@
             <span class="pied-version">Intersection By Ray</span>
         </div>
         <div class="pied-copyright">
-           Version 1.2 //  Compatible avec .xlsx, .xls et .csv
+           Version 1.3 //  Compatible avec .xlsx, .xls et .csv
         </div>
     </footer>
 	 
+	 
+	 
+
 	 <script>
         // ── 1. RÉFÉRENCES AUX ÉLÉMENTS HTML ──────────────────────────────
         // document.getElementById('xxx') attrape l'élément avec id="xxx".
@@ -320,22 +323,24 @@
             );
 
             // Liste B → reste un tableau classique
-            const dataB = inputs.b.value
-                .split(/\r?\n/)
-                .map(s => s.trim())
-                .filter(s => s !== '');
-
+            const dataB = new Set(
+                inputs.b.value
+                    .split(/\r?\n/)
+                    .map(s => s.trim())
+                    .filter(s => s !== '') );
+					
             // Si les deux zones sont vides
-            if (dataA.size === 0 && dataB.length === 0) {
+            if (dataA.size === 0 && dataB.size === 0) {
                 notify('ERREUR : AUCUNE DONNÉE DÉTECTÉE');
                 return; // sort immédiatement de la fonction
             }
 
             // INTERSECTION : garde uniquement les éléments de B qui existent dans A
             // new Set(...) supprime les doublons, [...] remet en tableau
-            const valeurs_communes = [...new Set(dataB.filter(item => dataA.has(item)))];
+			const swap = [...dataB];
+            const valeurs_communes = [...new Set(swap.filter(item => dataA.has(item)))];
 
-            afficherResultats(valeurs_communes, Math.max(dataA.size, dataB.length));
+            afficherResultats(valeurs_communes, Math.max(dataA.size,dataB.size));
         }
 
 
