@@ -16,4 +16,3 @@
 
 *   **Frontend :** HTML5 / CSS3 
 *   **Logique :** JavaScript 
-*   **Librairie :** [SheetJS (XLSX)](https://github.com/SheetJS/sheetjs) pour le parsing de fichiers côté client (100% local, respect de la vie privée).
