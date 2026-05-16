@@ -427,8 +427,8 @@
 
         /* Le grand chiffre animé */
         .grand-chiffre {
-            font-size: 3.75rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 500;
             font-style: italic;
         }
 
