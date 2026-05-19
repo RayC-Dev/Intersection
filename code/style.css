@@ -580,11 +580,25 @@
             letter-spacing: -0.02em;
         }
 
-        .pied-copyright {
-            font-family: 'Space Mono', monospace;
+        .footer-links {
+            display: flex;
+            gap: 2.5rem;
+			font-family: 'Space Mono', monospace;
             font-size: 0.625rem;
             opacity: 0.5;
             text-transform: uppercase;
+        }
+
+        .footer-links a {
+            color: var(--pure-yellow);
+            text-decoration: underline;
+            text-decoration-color: var(--pure-yellow);
+            text-underline-offset: 4px;
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover {
+            color: white;
         }
 
 
